@@ -2,10 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone", // Required for Docker multi-stage build
-  experimental: {
-    // Required for Turbopack + React 19
-    reactCompiler: false,
-  },
+  // Required for Turbopack + React 19
+  reactCompiler: false,
 
   async headers() {
     const securityHeaders = [

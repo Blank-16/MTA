@@ -10,11 +10,11 @@ ENV PNPM_HOME="/pnpm" PATH="$PNPM_HOME:$PATH"
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml .npmrc* ./
 
 # BuildKit cache mount — pnpm store persists across builds
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm install --frozen-lockfile
+    pnpm install --frozen-lockfile --ignore-scripts
 
 # ── Stage 2: build ────────────────────────────────────────────────────────────
 FROM node:22-alpine AS builder
