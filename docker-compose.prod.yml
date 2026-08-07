@@ -1,0 +1,92 @@
+# Production overrides — no dev mounts, resource limits, secrets from env
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  postgres:
+    ports: []
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  redis:
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+  backend:
+    volumes: []
+    environment:
+      ENVIRONMENT: production
+      LOG_LEVEL: INFO
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+
+  celery_worker:
+    volumes: []
+    command:
+      - celery
+      - -A
+      - app.workers.ingestion_worker.celery_app
+      - worker
+      - --loglevel=warning
+      - --concurrency=4
+      - --without-heartbeat
+      - --without-gossip
+      - --without-mingle
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+
+  migrate:
+    deploy:
+      restart_policy:
+        condition: none
+
+  frontend:
+    volumes: []
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+
+  otel_collector:
+    ports: []
+
+secrets:
+  postgres_password:
+    external: true
