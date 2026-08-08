@@ -8,8 +8,6 @@ if (!connectionString) {
 }
 
 // Prevent multiple connections in Next.js dev hot-reload
-const globalForDb = globalThis as unknown as { _pg: postgres.Sql | undefined };
-const pg = globalForDb._pg ?? postgres(connectionString, { max: 5 });
-if (process.env.NODE_ENV !== "production") globalForDb._pg = pg;
-
-export const db = drizzle(pg, { schema });
+const globalForDb = globalThis as unknown as { _db: any };
+export const db = globalForDb._db ?? drizzle(connectionString);
+if (process.env.NODE_ENV !== "production") globalForDb._db = db;
