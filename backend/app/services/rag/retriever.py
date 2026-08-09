@@ -21,7 +21,7 @@ class RetrievedChunk(TypedDict):
 class ClinicalRetriever:
     def __init__(self, connection_string: str) -> None:
         self._embeddings = OpenAIEmbeddings(
-            model="text-embedding-3-large",
+            model="text-embedding-3-small",
             openai_api_key=settings.openai_api_key,
         )
         self._store = PGVector(

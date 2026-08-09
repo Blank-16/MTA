@@ -33,7 +33,7 @@ def _cosine(a: np.ndarray, b: np.ndarray) -> float:
 class TopicClassifier:
     def __init__(self) -> None:
         self._embeddings = OpenAIEmbeddings(
-            model="text-embedding-3-large",
+            model="text-embedding-3-small",
             openai_api_key=settings.openai_api_key,
         )
         self._anchor_vectors: list[np.ndarray] | None = None

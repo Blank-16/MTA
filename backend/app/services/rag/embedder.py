@@ -15,7 +15,7 @@ class ClinicalEmbedder:
 
     def __init__(self) -> None:
         self._model = OpenAIEmbeddings(
-            model="text-embedding-3-large",
+            model="text-embedding-3-small",
             openai_api_key=settings.openai_api_key,
             # Chunk large document batches automatically
             chunk_size=200,
