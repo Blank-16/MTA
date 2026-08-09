@@ -16,8 +16,7 @@ def upgrade() -> None:
     # GIN index enables fast jsonb key/value lookups used by admin restriction stats
     # CONCURRENTLY: does not lock the table during index creation (important on live DB)
     op.execute(
-        "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_messages_restriction_log "
-        "ON triage_messages USING gin (restriction_log)"
+        "CREATE INDEX IF NOT EXISTS idx_messages_restriction_log ON triage_messages USING gin (restriction_log)"
     )
 
 

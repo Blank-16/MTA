@@ -21,7 +21,7 @@ def upgrade() -> None:
         CREATE TABLE guidelines (
             id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             content         TEXT NOT NULL,
-            embedding       VECTOR(3072) NOT NULL,
+            embedding       VECTOR(1536) NOT NULL,
             source          TEXT NOT NULL,
             section         TEXT NOT NULL,
             jurisdiction    TEXT NOT NULL DEFAULT 'global',
