@@ -38,7 +38,7 @@ def ingest_task(self, source: str) -> dict:
         return {"source": source, "chunks_ingested": result}
     except Exception as exc:
         logger.error("Ingestion task failed source=%s: %s", source, exc, exc_info=True)
-        raise self.retry(exc=exc)
+        raise self.retry(exc=exc) from exc
 
 
 _ALLOWED_SOURCE_RE = __import__('re').compile(r'^[A-Z]{2,10}$')

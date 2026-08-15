@@ -3,7 +3,7 @@ from app.core.token_counter import count_messages_tokens, count_tokens
 
 class TestTokenCounter:
     def test_empty_string(self):
-        assert count_tokens("") >= 1  # min 1
+        assert count_tokens("") == 0
 
     def test_short_text_positive(self):
         n = count_tokens("I have a headache")

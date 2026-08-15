@@ -93,4 +93,4 @@ async def trigger_ingestion(source: str) -> dict:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to queue ingestion",
-        )
+        ) from exc

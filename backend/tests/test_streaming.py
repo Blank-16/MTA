@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 
@@ -297,7 +298,7 @@ class TestPathTraversal:
 class TestTopicClassifierAssert:
     def test_no_assert_statements(self):
         """Runtime invariants must use explicit raise, not assert (stripped by -O)."""
-        src = open("app/services/restrictions/topic_classifier.py").read()
+        src = Path("app/services/restrictions/topic_classifier.py").read_text(encoding="utf-8")
         assert "assert self._anchor_vectors" not in src, \
             "assert must be replaced with explicit raise"
         assert "raise RuntimeError" in src, "Must raise RuntimeError explicitly"

@@ -29,7 +29,7 @@ async def create_session(request: SessionCreateRequest, db: DbConn, user: Option
     except Exception as exc:
         logger.error("Failed to create session: %s", exc, exc_info=True)
         await db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Session creation failed")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Session creation failed") from exc
 
     logger.info("Session created id=%s user=%s", session_id, user_id or "anonymous")
     return SessionResponse(session_id=session_id, session_token=session_token)
@@ -100,7 +100,7 @@ async def end_session(
     except Exception as exc:
         logger.error("Failed to end session %s: %s", session_id, exc, exc_info=True)
         await db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to end session")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to end session") from exc
 
 
 @router.get("/sessions")

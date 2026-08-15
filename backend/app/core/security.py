@@ -62,12 +62,12 @@ def decode_access_token(token: str) -> TokenPayload:
         raw = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
     except ExpiredSignatureError:
         logger.debug("JWT expired")
-        raise TokenError("Token has expired")
+        raise TokenError("Token has expired") from None
     except JWTError as exc:
         logger.warning("JWT decode error: %s", exc)
-        raise TokenError("Invalid token")
+        raise TokenError("Invalid token") from exc
     try:
         return TokenPayload(**raw)
     except Exception as exc:
         logger.warning("JWT payload validation failed: %s", exc)
-        raise TokenError("Malformed token payload")
+        raise TokenError("Malformed token payload") from exc

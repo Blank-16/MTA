@@ -1,3 +1,4 @@
+from pathlib import Path
 
 from app.services.rag.ingestion import _chunk_id
 from app.services.rag.retriever import _mmr_select
@@ -75,7 +76,7 @@ class TestCeleryConfig:
 class TestMigration0003:
     def test_gin_index_migration_exists(self):
         """Migration 0003 must create GIN index for admin jsonb queries."""
-        src = open("migrations/versions/0003_jsonb_gin_index.py").read()
+        src = Path("migrations/versions/0003_jsonb_gin_index.py").read_text(encoding="utf-8")
         assert "gin" in src.lower(), "Must create a GIN index"
         assert "restriction_log" in src, "Index must be on restriction_log column"
         assert "CONCURRENTLY" in src, "Must use CONCURRENTLY to avoid table lock"

@@ -15,8 +15,7 @@ def configure_otel(app) -> None:
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-        from app.core.config import settings
-
+        
         resource = Resource.create({SERVICE_NAME: "medical-triage-backend"})
         provider = TracerProvider(resource=resource)
 

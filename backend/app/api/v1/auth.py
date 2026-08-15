@@ -60,9 +60,9 @@ async def register(payload: UserCreate, db: DbConn) -> UserResponse:
         # psycopg3 wraps this as psycopg.errors.UniqueViolation (subclass of IntegrityError)
         err_str = str(exc).lower()
         if "unique" in err_str or "duplicate" in err_str or "already exists" in err_str:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered") from exc
         logger.error("Register failed: %s", exc, exc_info=True)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Registration failed")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Registration failed") from exc
 
     logger.info("User registered id=%s email=%s", user_id, payload.email)
     return UserResponse(id=user_id, email=payload.email, is_active=True, created_at=now)
@@ -112,7 +112,7 @@ async def login(payload: LoginRequest, request: Request, response: Response, db:
     except Exception as exc:
         logger.error("Login token issuance failed: %s", exc, exc_info=True)
         await db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Login failed")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Login failed") from exc
 
     _set_refresh_cookie(response, raw_refresh)
     logger.info("User logged in id=%s", user_id)
@@ -175,7 +175,7 @@ async def refresh_token(
     except Exception as exc:
         logger.error("Token rotation failed: %s", exc, exc_info=True)
         await db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Token refresh failed")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Token refresh failed") from exc
 
     _set_refresh_cookie(response, new_raw)
     access_token = create_access_token(user_id)

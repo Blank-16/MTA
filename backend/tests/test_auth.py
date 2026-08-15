@@ -1,4 +1,5 @@
 import uuid
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -76,11 +77,11 @@ class TestTokenSecurity:
         import pytest
 
         from app.models.auth import UserCreate
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             UserCreate(email="x@x.com", password="weak")
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             UserCreate(email="x@x.com", password="alllowercase1")
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             UserCreate(email="x@x.com", password="NoDigitHere")
         # Valid password should not raise
         u = UserCreate(email="x@x.com", password="ValidPass1")
@@ -102,14 +103,14 @@ class TestTokenSecurity:
 class TestTimingOracle:
     def test_login_always_calls_bcrypt(self):
         """Verify the dummy hash path exists — bcrypt always runs even for unknown emails."""
-        src = open("app/api/v1/auth.py").read()
+        src = Path("app/api/v1/auth.py").read_text(encoding="utf-8")
         assert "_DUMMY_HASH" in src, "Dummy hash must exist to prevent timing oracle"
         assert "verify_password(payload.password, candidate_hash)" in src, \
             "Must call verify_password with candidate_hash (not row hash directly)"
 
     def test_cookie_path_is_root(self):
         """Cookie path must be / so the browser sends it to /api/auth routes."""
-        src = open("app/api/v1/auth.py").read()
+        src = Path("app/api/v1/auth.py").read_text(encoding="utf-8")
         assert 'path="/"' in src, "Cookie path must be '/' — not '/v1/auth'"
         assert 'path="/v1/auth"' not in src, "Old path still present"
 
@@ -117,7 +118,7 @@ class TestTimingOracle:
 class TestMigrationDBName:
     def test_no_hardcoded_db_name_in_grant(self):
         """Migration must not hardcode the database name in GRANT statements."""
-        src = open("migrations/versions/0002_users_refresh_tokens_rls.py").read()
+        src = Path("migrations/versions/0002_users_refresh_tokens_rls.py").read_text(encoding="utf-8")
         assert "GRANT CONNECT ON DATABASE triage_db" not in src, \
             "Database name must not be hardcoded — use current_database()"
 
@@ -125,7 +126,7 @@ class TestMigrationDBName:
 class TestRateLimiterIPCap:
     def test_ip_cap_present(self):
         """Rate limiter must have an IP-based secondary cap."""
-        src = open("app/core/rate_limiter.py").read()
+        src = Path("app/core/rate_limiter.py").read_text(encoding="utf-8")
         assert "rl:ip:" in src, "IP rate limit key must be present"
         assert "_check_window" in src, "_check_window helper must exist"
 
@@ -133,7 +134,7 @@ class TestRateLimiterIPCap:
 class TestDummyHashModuleLevel:
     def test_dummy_hash_not_in_function_body(self):
         """_DUMMY_HASH must be a module-level constant, not re-created per call."""
-        src = open("app/api/v1/auth.py").read()
+        src = Path("app/api/v1/auth.py").read_text(encoding="utf-8")
         login_fn_start = src.index("async def login(")
         login_fn_end = src.index("\n@router", login_fn_start)
         login_body = src[login_fn_start:login_fn_end]
@@ -142,7 +143,7 @@ class TestDummyHashModuleLevel:
 
     def test_jwt_algorithm_is_literal(self):
         """jwt_algorithm must be typed as Literal to prevent 'none' algorithm attacks."""
-        src = open("app/core/config.py").read()
+        src = Path("app/core/config.py").read_text(encoding="utf-8")
         assert 'jwt_algorithm: Literal[' in src, \
             "jwt_algorithm must use Literal type to restrict allowed algorithms"
         assert '"none"' not in src.split('jwt_algorithm')[1].split('\n')[0], \
@@ -168,7 +169,7 @@ class TestNBFClaim:
 class TestIPAuditLogging:
     def test_auth_uses_rate_limiter_ip_fn(self):
         """auth.py login must use _get_client_ip (trusted-proxy-aware) not raw x-forwarded-for."""
-        src = open("app/api/v1/auth.py").read()
+        src = Path("app/api/v1/auth.py").read_text(encoding="utf-8")
         assert "_get_client_ip(request)" in src, "Must use _get_client_ip from rate_limiter"
         raw_xfwd = 'request.headers.get("x-forwarded-for")'
         # raw x-forwarded-for outside of _get_client_ip is a spoof risk
@@ -209,7 +210,7 @@ class TestMiddlewareState:
     def test_state_not_reset_when_already_exists(self):
         scope = {"type": "http", "headers": [], "state": {"existing_key": "existing_value"}}
         from app.core.middleware import RequestIDMiddleware
-        mw = RequestIDMiddleware(app=None)
+        RequestIDMiddleware(app=None)
         if "state" not in scope:
             scope["state"] = {}
         scope["state"]["request_id"] = "test-id"
