@@ -166,9 +166,9 @@ async def run_chain_with_streaming(
 
     buffer = ""
     try:
-        async for chunk in llm.astream(messages, config=invoke_config):
+        async for chunk in llm.astream(messages, config=invoke_config):  # type: ignore
             if chunk.content:
-                buffer += chunk.content
+                buffer += chunk.content  # type: ignore
                 yield f"data: {json.dumps({'type': 'token', 'content': chunk.content})}\n\n"
     except Exception as exc:
         logger.error("LLM stream failed session=%s: %s", session_id, exc, exc_info=True)

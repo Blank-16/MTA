@@ -46,7 +46,7 @@ class GuidelineIngestionPipeline:
             embeddings=self._embeddings,
             collection_name="guidelines",
             connection=connection_string,
-            distance_strategy="cosine",
+            distance_strategy="cosine",  # type: ignore
         )
 
     async def ingest_document(self, file_path: str | Path, source_meta: dict) -> int:

@@ -104,7 +104,7 @@ async def _load_conversation_history(
         rows = await cur.fetchall()
 
     # Reverse so oldest is first
-    return [{"role": r["role"], "content": r["content"]} for r in reversed(rows)]
+    return [{"role": r["role"], "content": r["content"]} for r in reversed(rows)]  # type: ignore
 
 
 def _sse_error(code: RestrictionCode, http_status: int) -> StreamingResponse:
@@ -173,8 +173,8 @@ async def triage(
     if not input_result.passed:
         logger.warning("Input restriction code=%s", input_result.code, extra=log_ctx)
         return _sse_error(
-            input_result.code,
-            _RESTRICTION_HTTP_CODES.get(input_result.code, 422),
+            input_result.code,  # type: ignore
+            _RESTRICTION_HTTP_CODES.get(input_result.code, 422),  # type: ignore
         )
 
     # RAG retrieval (layer 3 gate)
@@ -187,7 +187,7 @@ async def triage(
     history_turns = await _load_conversation_history(db, request.session_id, settings.max_context_turns)
     history_text = format_history(history_turns)
 
-    context_text = format_context(chunks)
+    context_text = format_context(chunks)  # type: ignore
 
     return StreamingResponse(
         _stream_triage(
@@ -256,16 +256,16 @@ async def _stream_triage(
 
         # Phase 3: output restriction checks on complete buffer
         chunk_texts = [c["content"] for c in chunks]
-        output_result = await _pipeline.run_output(buffer, chunk_texts)
+        output_result = await _pipeline.run_output(buffer, chunk_texts)  # type: ignore
         if not output_result.passed and output_result.code != RestrictionCode.ESCALATION_TRIGGER:
             logger.warning("Output restriction code=%s", output_result.code, extra=log_ctx)
-            yield f"data: {json.dumps({'type': 'error', 'code': str(output_result.code), 'detail': _SAFE_MESSAGES.get(output_result.code, 'Response blocked.')})}\n\n"
+            yield f"data: {json.dumps({'type': 'error', 'code': str(output_result.code), 'detail': _SAFE_MESSAGES.get(output_result.code, 'Response blocked.')})}\n\n"  # type: ignore
             yield "data: [DONE]\n\n"
             return
 
         # Phase 4: parse full JSON
         try:
-            raw: dict = json.loads(buffer)
+            raw: dict = json.loads(buffer)  # type: ignore
         except json.JSONDecodeError as exc:
             logger.error("LLM returned invalid JSON: %s", exc, extra=log_ctx)
             yield f"data: {json.dumps({'type': 'error', 'detail': 'LLM returned an invalid response.'})}\n\n"

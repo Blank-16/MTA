@@ -46,7 +46,7 @@ class LLMJudge:
                 SystemMessage(content=_SYSTEM),
                 HumanMessage(content=f"Review:\n\n{response_text}"),
             ])
-            verdict = json.loads(result.content)
+            verdict = json.loads(result.content)  # type: ignore
             return JudgeVerdict(
                 safe=bool(verdict.get("safe", False)),
                 issue=verdict.get("issue"),

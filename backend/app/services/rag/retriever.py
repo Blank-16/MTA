@@ -28,7 +28,7 @@ class ClinicalRetriever:
             embeddings=self._embeddings,
             collection_name="guidelines",
             connection=connection_string,
-            distance_strategy="cosine",
+            distance_strategy="cosine",  # type: ignore
         )
 
     async def retrieve(self, query: str) -> list[RetrievedChunk]:

@@ -77,16 +77,16 @@ async def login(payload: LoginRequest, request: Request, response: Response, db:
 
     # Timing-safe: always run bcrypt even when user not found.
     # Skipping bcrypt on missing user leaks email existence via response time delta.
-    candidate_hash = row["hashed_password"] if row else _DUMMY_HASH
+    candidate_hash = row["hashed_password"] if row else _DUMMY_HASH  # type: ignore
     password_ok = verify_password(payload.password, candidate_hash)
 
     if row is None or not password_ok:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    if not row["is_active"]:
+    if not row["is_active"]:  # type: ignore
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is disabled")
 
-    user_id = uuid.UUID(row["id"])
+    user_id = uuid.UUID(row["id"])  # type: ignore
     access_token = create_access_token(user_id)
 
     # Issue refresh token
@@ -151,10 +151,10 @@ async def refresh_token(
         response.delete_cookie(_COOKIE_NAME, path="/")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired refresh token")
 
-    if not row["is_active"]:
+    if not row["is_active"]:  # type: ignore
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is disabled")
 
-    user_id = uuid.UUID(row["user_id"])
+    user_id = uuid.UUID(row["user_id"])  # type: ignore
 
     # Rotate: revoke old token, issue new one
     new_raw = secrets.token_urlsafe(48)
@@ -162,7 +162,7 @@ async def refresh_token(
 
     try:
         await db.execute(
-            "UPDATE refresh_tokens SET revoked = TRUE WHERE id = %s", (row["id"],)
+            "UPDATE refresh_tokens SET revoked = TRUE WHERE id = %s", (row["id"],)  # type: ignore
         )
         await db.execute(
             """

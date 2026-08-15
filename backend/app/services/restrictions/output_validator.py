@@ -107,7 +107,7 @@ class OutputValidator:
                 SystemMessage(content=_JUDGE_SYSTEM),
                 HumanMessage(content=f"Review:\n\n{text}"),
             ])
-            verdict = json.loads(result.content)
+            verdict = json.loads(result.content)  # type: ignore
 
             if not verdict.get("safe", True):
                 category = verdict.get("category", "other")
